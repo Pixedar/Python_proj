@@ -2,13 +2,11 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import ctypes
-
+import Assets
 import random
 
 
-bomb_img = QImage("./images/cross.png")
-flag_img = QImage("./images/flag.png")
-img_m_flag = QImage("./images/m_flag.png")
+
 
 r_1 = 0
 r_2 = 1
@@ -57,13 +55,19 @@ class Pos(QWidget):
 
         if self.is_revealed:
             if self.stat:
-                p.drawPixmap(r, QPixmap(bomb_img))
+                p.drawPixmap(r, QPixmap(Assets.Assets.bomb))
                 if not self.stop:
                     ctypes.windll.user32.MessageBoxW(0, "Przegrałeś", "Komunikat", 1)
                 self.stop = True
 
             elif self.next_to_n > 0:
-                pen = QColor('#f44336')
+                if int(self.next_to_n) == 1:
+                    pen = QColor('black')
+                elif int(self.next_to_n) == 2:
+                    pen = QColor('green')
+                else:
+                    pen = QColor('red')
+                print(self.next_to_n)
                 p.setPen(pen)
                 f = p.font()
                 f.setBold(True)
@@ -71,9 +75,9 @@ class Pos(QWidget):
                 p.drawText(r, Qt.AlignHCenter | Qt.AlignVCenter, str(self.next_to_n))
 
         elif self.is_flagged:
-            p.drawPixmap(r, QPixmap(flag_img))
+            p.drawPixmap(r, QPixmap(Assets.Assets.flag))
         elif self.m_flagged:
-            p.drawPixmap(r, QPixmap(img_m_flag))
+            p.drawPixmap(r, QPixmap(Assets.Assets.m_flag))
 
 
     def update_flag(self):
@@ -217,6 +221,7 @@ class Game(QMainWindow):
 
 
 def start(w, h, amount):
+    Assets.Assets.load()
     app = QApplication([])
     global num_of_bombs
     num_of_bombs = amount
