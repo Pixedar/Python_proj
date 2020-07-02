@@ -5,9 +5,6 @@ import ctypes
 import Assets
 import random
 
-
-
-
 r_1 = 0
 r_2 = 1
 
