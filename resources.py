@@ -22,6 +22,8 @@ class Assets:
         Assets.bomb = pg.image.load("./images/bomb.png")
         Assets.flag = pg.image.load("./images/flag.png")
         Assets.m_flag = pg.image.load("./images/m_flag.png")
+        Assets.death = pg.image.load("./images/skull.png")
+        Assets.win = pg.image.load("./images/win.png")
         Assets.flag = pg.transform.scale(Assets.flag,(cell_size,cell_size))
         Assets.m_flag = pg.transform.scale(Assets.m_flag, (cell_size, cell_size))
         Assets.bomb = pg.transform.scale(Assets.bomb, (cell_size, cell_size))

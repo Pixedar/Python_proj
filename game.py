@@ -8,17 +8,18 @@ import resources
 CELLS_SIZE = 18
 CELL_MARGIN = 0.25
 
+
 # pylint: disable=R0201
 class GameController:
     def __init__(self, w, h, bombs):
         self.game_ended = False
+        self.game_failed = False
         self.width = w
         self.height = h
         self.n_mines = bombs
         self.margin = self.get_margin()
         self.grid = self.get_grid()
         self.add_mines()
-        self.last_cell = [0, 0]
         self.font = pg.font.SysFont(resources.Fonts.CELL_FONT, round(CELLS_SIZE * 1.5))
         for x in range(0, self.width):
             for y in range(0, self.height):
@@ -32,9 +33,7 @@ class GameController:
             for yi in range(max(0, y - 1), min(y + 2, self.height)):
                 cell = self.grid[xi][yi]
                 if not cell.is_mine() and not cell.flagged and not cell.possibly_mine:
-                    # print(self.grid[xi][yi].adjacent)
                     if cell.adjacent == 0 and not cell.is_inactive():
-                        # print('ddsdfsfs')
                         cell.set_inactive(True)
                         self.expand(xi, yi)
                     else:
@@ -70,13 +69,11 @@ class GameController:
             x, y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
             if (x, y) not in mines:
                 self.grid[x][y].set_mine()
-                # w = self.grid.itemAtPosition(y,x).widget()
-                # w.is_mine = True
                 mines.append((x, y))
 
     def main_loop(self, frame):
         while True:
-
+            self.check_game_status()
             pos = pg.mouse.get_pos()
             column = pos[0] // (CELLS_SIZE + self.margin)
             row = pos[1] // (CELLS_SIZE + self.margin)
@@ -84,7 +81,7 @@ class GameController:
                 self.grid[row][column].cursor_above = True
 
             for event in pg.event.get():
-                if event.type == pg.QUIT:  # If user clicked close
+                if event.type == pg.QUIT:
                     return True
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     self.update_cell_status(event, row, column)
@@ -98,8 +95,21 @@ class GameController:
         a = random.randint(0, self.width - 1)
         b = random.randint(0, self.height - 1)
         self.grid[a][b].cell_dead = True
-        label = self.font.render('PRZEGRAŁEŚ !', 2, pg.Color(255, 255, 255))
-        frame.blit(label, pg.Rect(0, 0, 200, 200), label.get_rect())
+
+        img = resources.Assets.win
+        text = 'WYGRAŁEŚ !'
+        if self.game_failed:
+            img = resources.Assets.death
+            text = 'PRZEGRAŁEŚ !'
+
+        window_size = frame.get_size()
+        game_over_img = pg.transform.scale(img,
+                                           (round(window_size[0] * 1), round(window_size[1] * 1)))
+        frame.blit(game_over_img, game_over_img.get_rect())
+
+        label = self.font.render(text, 2, pg.Color('white'))
+        frame.blit(label, pg.Rect(round(window_size[0] * 0.5 - label.get_rect().width * 0.5), 5, 200, 200),
+                   label.get_rect())
 
     def update_cell_status(self, event, row, column):
         if self.game_ended:
@@ -108,30 +118,40 @@ class GameController:
             return
         cell = self.grid[row][column]
         if event.button == 1:
+            if cell.flagged or cell.possibly_mine:
+                return
             if cell.is_mine():
                 self.game_ended = True
-                self.last_cell = [row, column]
+                self.game_failed = True
             cell.set_inactive(True)
             self.expand(row, column)
         elif event.button == 3:
             cell.set_flag()
 
-    # def get_pos(self):
-    #     pos = pg.mouse.get_pos()
-    #     column = pos[0] // (CELLS_SIZE + self.margin)
-    #     row = pos[1] // (CELLS_SIZE + self.margin)
-    #     return row, column
-
     def draw(self, frame):
+
         frame.fill(pg.Color(resources.Colors.BOARD_BACKGROUND))
 
         size = CELLS_SIZE + self.margin
-        # Draw the grid
+
         for row in range(self.width):
             for column in range(self.height):
                 rect = self.get_cell_rect(row, column)
                 cell = self.grid[row][column]
                 cell.draw(frame, rect, self.font)
+
+    def check_game_status(self):
+        flag_sum = 0
+        inactive_sum = 0
+        for row in range(self.width):
+            for column in range(self.height):
+                cell = self.grid[row][column]
+                if cell.inactive:
+                    inactive_sum = inactive_sum + 1
+                if cell.flagged:
+                    flag_sum = flag_sum + 1
+        if self.n_mines == flag_sum and inactive_sum == self.width * self.height - self.n_mines:
+            self.game_ended = True
 
     def get_cell_rect(self, row, column):
         size = CELLS_SIZE + self.margin
@@ -141,10 +161,10 @@ class GameController:
 
     def get_pos(self):
         pos = pg.mouse.get_pos()
-        # Change the x/y screen coordinates to grid coordinates
         column = pos[0] // (CELLS_SIZE + self.margin)
         row = pos[1] // (CELLS_SIZE + self.margin)
         return [row, column]
+
 
 # pylint: disable=R0201
 class GameWindow:
@@ -166,4 +186,3 @@ class GameWindow:
 
     def get_margin(self):
         return round(CELLS_SIZE * CELL_MARGIN)
-
