@@ -1,227 +1,169 @@
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-import ctypes
-import Assets
 import random
 
-r_1 = 0
-r_2 = 1
+import pygame as pg
 
-flagCtn = 0
-num_of_bombs = 0
-class Pos(QWidget):
-    expandable = pyqtSignal(int, int)
-    clicked = pyqtSignal()
-    fixed_size = 20
-    def __init__(self, x, y, *args, **kwargs):
-        super(Pos, self).__init__(*args, **kwargs)
-        self.setFixedSize(QSize(self.fixed_size, self.fixed_size))
-        self.flagCtn = 0
-        self.x = x
-        self.y = y
-        self.stop = False
+from cell import Cell
+import resources
 
-    def reset(self):
-        self.is_start = False
-        self.stat = False
-        self.next_to_n = 0
+CELLS_SIZE = 18
+CELL_MARGIN = 0.25
 
-        self.is_revealed = False
-        self.is_flagged = False
-        self.m_flagged = False
-        self.update()
+# pylint: disable=R0201
+class GameController:
+    def __init__(self, w, h, bombs):
+        self.game_ended = False
+        self.width = w
+        self.height = h
+        self.n_mines = bombs
+        self.margin = self.get_margin()
+        self.grid = self.get_grid()
+        self.add_mines()
+        self.last_cell = [0, 0]
+        self.font = pg.font.SysFont(resources.Fonts.CELL_FONT, round(CELLS_SIZE * 1.5))
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                self.grid[x][y].set_num_of_adjacent(self.get_adjacency_n(x, y))
 
-    def paintEvent(self, event):
-        p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+    def expand(self, x, y):
 
-        r = event.rect()
+        pg.display.flip()
 
-        if self.is_revealed:
-            color = self.palette().color(QPalette.Background)
-            outer, inner = color, color
-        else:
-            outer, inner = Qt.gray, Qt.lightGray
+        for xi in range(max(0, x - 1), min(x + 2, self.width)):
+            for yi in range(max(0, y - 1), min(y + 2, self.height)):
+                cell = self.grid[xi][yi]
+                if not cell.is_mine() and not cell.flagged and not cell.possibly_mine:
+                    # print(self.grid[xi][yi].adjacent)
+                    if cell.adjacent == 0 and not cell.is_inactive():
+                        # print('ddsdfsfs')
+                        cell.set_inactive(True)
+                        self.expand(xi, yi)
+                    else:
+                        cell.set_inactive(True)
 
-        p.fillRect(r, QBrush(inner))
-        pen = QPen(outer)
-        pen.setWidth(1)
-        p.setPen(pen)
-        p.drawRect(r)
+    def get_grid(self):
+        grid = []
+        for row in range(self.width):
+            grid.append([])
+            for column in range(self.height):
+                grid[row].append(Cell(False))
+        return grid
 
-        if self.is_revealed:
-            if self.stat:
-                p.drawPixmap(r, QPixmap(Assets.Assets.bomb))
-                if not self.stop:
-                    ctypes.windll.user32.MessageBoxW(0, "Przegrałeś", "Komunikat", 1)
-                self.stop = True
+    def get_margin(self):
+        return round(CELLS_SIZE * CELL_MARGIN)
 
-            elif self.next_to_n > 0:
-                if int(self.next_to_n) == 1:
-                    pen = QColor('black')
-                elif int(self.next_to_n) == 2:
-                    pen = QColor('green')
-                else:
-                    pen = QColor('red')
-                print(self.next_to_n)
-                p.setPen(pen)
-                f = p.font()
-                f.setBold(True)
-                p.setFont(f)
-                p.drawText(r, Qt.AlignHCenter | Qt.AlignVCenter, str(self.next_to_n))
+    def get_surrounding(self, x, y):
+        result = []
+        for xi in range(max(0, x - 1), min(x + 2, self.width)):
+            for yi in range(max(0, y - 1), min(y + 2, self.height)):
+                result.append(self.grid[xi][yi])
+        return result
 
-        elif self.is_flagged:
-            p.drawPixmap(r, QPixmap(Assets.Assets.flag))
-        elif self.m_flagged:
-            p.drawPixmap(r, QPixmap(Assets.Assets.m_flag))
-
-
-    def update_flag(self):
-        global flagCtn
-        if (self.is_flagged):
-            self.m_flagged = True
-            self.is_flagged = False
-            flagCtn = flagCtn - 1
-        elif self.m_flagged:
-
-            self.m_flagged = False
-            self.is_flagged = False
-            flagCtn = flagCtn - 1
-
-        else:
-            self.is_flagged = True
-            flagCtn = flagCtn + 1
-            if(flagCtn >= num_of_bombs):
-               ctypes.windll.user32.MessageBoxW(0, "Wygrałeś", "Komunikat", 1)
-        self.update()
-        self.clicked.emit()
-
-    def reveal(self):
-        self.is_revealed = True
-        self.update()
-
-    def click(self):
-        if not self.is_revealed:
-            self.reveal()
-            if self.next_to_n == 0:
-                self.expandable.emit(self.x, self.y)
-
-        self.clicked.emit()
-
-    def mouseReleaseEvent(self, e):
-        if (e.button() == Qt.RightButton and not self.is_revealed):
-            print('d')
-            self.update_flag()
-
-        elif (e.button() == Qt.LeftButton):
-            self.click()
-
-
-class Game(QMainWindow):
-    spacing = 4
-    def setSpacing(self,spacing):
-        self.spacing = spacing
-    def setParams(self,w_size, h_size, num_of_mines):
-        self.w_size = w_size
-        self.h_size = h_size
-        self.n_mines = num_of_mines
-
-    def setLayout(self,*args, **kwargs):
-        w = QWidget()
-        hb = QHBoxLayout()
-
-        vb = QVBoxLayout()
-        vb.addLayout(hb)
-
-        self.grid = QGridLayout()
-        self.grid.setSpacing(self.spacing)
-
-        vb.addLayout(self.grid)
-        w.setLayout(vb)
-        self.setCentralWidget(w)
-
-    def __init__(self, w_size, h_size, num_of_mines, *args, **kwargs):
-        super(Game, self).__init__(*args, **kwargs)
-        self.setParams(w_size, h_size, num_of_mines)
-        self.setLayout(*args, **kwargs)
-
-        self.init_map()
-        self.update_status(r_1)
-        self.map_reset()
-        self.update_status(r_1)
-        self.show()
-
-    def init_map(self):
-        for x in range(0, self.w_size):
-            for y in range(0, self.h_size):
-                w = Pos(x, y)
-                self.grid.addWidget(w, y, x)
-                w.expandable.connect(self.expand_reveal)
-
-    def get_neighboring_n(self,x, y):
-        positions = self.get_neighboring(x, y)
-        n_mines = sum(1 if w.stat else 0 for w in positions)
+    def get_adjacency_n(self, x, y):
+        positions = self.get_surrounding(x, y)
+        n_mines = sum(1 if w.is_mine() else 0 for w in positions)
 
         return n_mines
 
-    def set_mines(self):
-        positions = []
-        while len(positions) < self.n_mines:
-            x, y = random.randint(0, self.w_size - 1), random.randint(0, self.h_size - 1)
-            if (x, y) not in positions:
-                w = self.grid.itemAtPosition(y, x).widget()
-                w.stat = True
-                positions.append((x, y))
-    def set_nums(self):
-        for x in range(0, self.w_size):
-            for y in range(0, self.h_size):
-                w = self.grid.itemAtPosition(y, x).widget()
-                w.next_to_n = self.get_neighboring_n(x, y)
+    def add_mines(self):
+        mines = []
+        while len(mines) < self.n_mines:
+            x, y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
+            if (x, y) not in mines:
+                self.grid[x][y].set_mine()
+                # w = self.grid.itemAtPosition(y,x).widget()
+                # w.is_mine = True
+                mines.append((x, y))
 
-    def map_reset(self):
-        for x in range(0, self.w_size):
-            for y in range(0, self.h_size):
-                w = self.grid.itemAtPosition(y, x).widget()
-                w.reset()
+    def main_loop(self, frame):
+        while True:
 
-        self.set_mines()
-        self.set_nums()
+            pos = pg.mouse.get_pos()
+            column = pos[0] // (CELLS_SIZE + self.margin)
+            row = pos[1] // (CELLS_SIZE + self.margin)
+            if row in range(0, self.width) and column in range(0, self.height):
+                self.grid[row][column].cursor_above = True
 
-    def get_neighboring(self, x, y):
-        positions = []
+            for event in pg.event.get():
+                if event.type == pg.QUIT:  # If user clicked close
+                    return True
+                elif event.type == pg.MOUSEBUTTONDOWN:
+                    self.update_cell_status(event, row, column)
 
-        for xi in range(max(0, x - 1), min(x + 2, self.w_size)):
-            for yi in range(max(0, y - 1), min(y + 2, self.h_size)):
-                positions.append(self.grid.itemAtPosition(yi, xi).widget())
+            self.draw(frame)
+            if self.game_ended:
+                self.end_seq(frame)
+            pg.display.flip()
 
-        return positions
+    def end_seq(self, frame):
+        a = random.randint(0, self.width - 1)
+        b = random.randint(0, self.height - 1)
+        self.grid[a][b].cell_dead = True
+        label = self.font.render('PRZEGRAŁEŚ !', 2, pg.Color(255, 255, 255))
+        frame.blit(label, pg.Rect(0, 0, 200, 200), label.get_rect())
 
-    def button_pressed(self):
-        self.show_map()
+    def update_cell_status(self, event, row, column):
+        if self.game_ended:
+            return
+        if not (row in range(0, self.width) and column in range(0, self.height)):
+            return
+        cell = self.grid[row][column]
+        if event.button == 1:
+            if cell.is_mine():
+                self.game_ended = True
+                self.last_cell = [row, column]
+            cell.set_inactive(True)
+            self.expand(row, column)
+        elif event.button == 3:
+            cell.set_flag()
 
-    def show_map(self):
-        for x in range(0, self.w_size):
-            for y in range(0, self.h_size):
-                w = self.grid.itemAtPosition(y, x).widget()
-                w.reveal()
+    # def get_pos(self):
+    #     pos = pg.mouse.get_pos()
+    #     column = pos[0] // (CELLS_SIZE + self.margin)
+    #     row = pos[1] // (CELLS_SIZE + self.margin)
+    #     return row, column
 
-    def expand_reveal(self, x, y):
-        for xi in range(max(0, x - 1), min(x + 2, self.w_size)):
-            for yi in range(max(0, y - 1), min(y + 2, self.h_size)):
-                w = self.grid.itemAtPosition(yi, xi).widget()
-                if not w.stat:
-                    w.click()
+    def draw(self, frame):
+        frame.fill(pg.Color(resources.Colors.BOARD_BACKGROUND))
 
-    def update_status(self, status):
-        self.status = status
+        size = CELLS_SIZE + self.margin
+        # Draw the grid
+        for row in range(self.width):
+            for column in range(self.height):
+                rect = self.get_cell_rect(row, column)
+                cell = self.grid[row][column]
+                cell.draw(frame, rect, self.font)
 
+    def get_cell_rect(self, row, column):
+        size = CELLS_SIZE + self.margin
+        w = size * column + self.margin
+        h = size * row + self.margin
+        return pg.Rect(w, h, CELLS_SIZE, CELLS_SIZE)
 
-def start(w, h, amount):
-    Assets.Assets.load()
-    app = QApplication([])
-    global num_of_bombs
-    num_of_bombs = amount
-    window = Game(w, h, amount)
+    def get_pos(self):
+        pos = pg.mouse.get_pos()
+        # Change the x/y screen coordinates to grid coordinates
+        column = pos[0] // (CELLS_SIZE + self.margin)
+        row = pos[1] // (CELLS_SIZE + self.margin)
+        return [row, column]
 
-    app.exec_()
+# pylint: disable=R0201
+class GameWindow:
+    def __init__(self, w, h, bombs):
+        pg.init()
+        resources.Assets.load(CELLS_SIZE)
+        self.frame = pg.display.set_mode(self.get_window_size(w, h))
+        pg.display.set_caption("Saper")
+        self.game_controller = GameController(w, h, bombs)
+
+    def start_game(self):
+        self.game_controller.main_loop(self.frame)
+        pg.quit()
+
+    def get_window_size(self, w, h):
+        margin = self.get_margin()
+        size = CELLS_SIZE + margin
+        return [size * h + margin, size * w + margin]
+
+    def get_margin(self):
+        return round(CELLS_SIZE * CELL_MARGIN)
+

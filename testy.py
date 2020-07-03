@@ -1,6 +1,7 @@
 import main
 import unittest
 import game
+import Assets as assets
 
 class Basic_tests(unittest.TestCase):
     def mianTest(self):
@@ -17,5 +18,11 @@ class Positon_class_tests(unittest.TestCase):
          self.assertEqual(self.cell.y,5)
 
 
+class TestAssets(unittest.TestCase):
+    def test_plikow(self):
+        assets.Assets.load()
+        self.assertIsNotNone(assets.Assets.bomb)
+        self.assertIsNotNone(assets.Assets.flag)
+        self.assertIsNotNone(assets.Assets.m_flag)
 
 

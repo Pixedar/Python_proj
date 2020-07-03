@@ -1,7 +1,9 @@
 """Moduł klasy ekran startowego"""
+import logging
+
 import tkinter as tk
 
-import Assets as assets
+from resources import Colors
 
 MAX_BOARD_SIZE = 15
 MIN_BOARD_SIZE = 2
@@ -14,7 +16,7 @@ class MainWindow:
     """Klasa ekranu startowego"""
 
     def __init__(self):
-        pass
+        self.frame = tk.Tk()
 
     @staticmethod
     def validation_check(val, max_amount=None):
@@ -29,9 +31,9 @@ class MainWindow:
     def callback(self, val, entry, max_amount=None):
         """ta metoda wykonuje się kiedy nastepuje zmiana wartości w entry"""
         if not self.validation_check(val, max_amount):
-            entry.config({"background": assets.bad_val_color()})
+            entry.config({"background": Colors.BAD_VAL})
         else:
-            entry.config({"background": assets.correct_val_color()})
+            entry.config({"background": Colors.CORRECT_VAL})
 
     @staticmethod
     def init_labels(frame):
@@ -64,19 +66,25 @@ class MainWindow:
 
     def init(self, button_callback):
         """metoda inicjalizująca"""
-        frame = tk.Tk()
 
         width = tk.StringVar(value=DEFAULT_WIDTH)
         height = tk.StringVar(value=DEFAULT_HEIGHT)
         amount = tk.StringVar(value=MAX_NUM_OF_BOMBS)
 
-        self.init_labels(frame)
-        self.init_entries(frame, width, height, amount)
+        self.init_labels(self.frame)
+        self.init_entries(self.frame, width, height, amount)
 
-        start_button = tk.Button(frame, text='Start',
+        start_button = tk.Button(self.frame, text='Start',
                                  command=lambda: button_callback(self, width, height, amount))
 
         start_button.grid_rowconfigure(0, weight=1)
         start_button.grid_columnconfigure(0, weight=1)
         start_button.grid(column=4, row=0, rowspan=3, sticky=tk.N + tk.S + tk.E + tk.W)
-        return frame
+        return self.frame
+
+    def exit(self):
+        """metoda zamykająca okno"""
+        try:
+            self.frame.destroy()
+        except NameError:
+            logging.warning('nie można zmknąc okna')

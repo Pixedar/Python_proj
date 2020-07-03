@@ -1,21 +1,16 @@
 import ctypes
 
-import game as game
+from game import GameWindow
 import start_window as m_window
-
-
-class InvalidDataException:
-    def __init__(self):
-        super().__init__("Niepoprawne dane")
-
 
 def start_button_callback(obj, w, h, amount):
     _max = int(w.get()) * int(h.get())
     if not obj.validation_check(w) and obj.validation_check(h) and obj.validation_check(amount, _max):
         ctypes.windll.user32.MessageBoxW(0, "Wprowadź poprawne dane", "Błąd", 1)
-        raise InvalidDataException
     else:
-        game.start(int(w.get()), int(w.get()), int(amount.get()))
+        obj.exit()
+        game = GameWindow(int(w.get()), int(w.get()), int(amount.get()))
+        game.start_game()
 
 
 def main():
