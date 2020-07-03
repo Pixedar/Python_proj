@@ -23,12 +23,10 @@ class GameController:
         self.font = pg.font.SysFont(resources.Fonts.CELL_FONT, round(CELLS_SIZE * 1.5))
         for x in range(0, self.width):
             for y in range(0, self.height):
-                self.grid[x][y].set_num_of_adjacent(self.get_adjacency_n(x, y))
+                self.grid[x][y].set_num_of_adjacent(self.get_adjacency(x, y))
 
     def expand(self, x, y):
-
         pg.display.flip()
-
         for xi in range(max(0, x - 1), min(x + 2, self.width)):
             for yi in range(max(0, y - 1), min(y + 2, self.height)):
                 cell = self.grid[xi][yi]
@@ -57,10 +55,9 @@ class GameController:
                 result.append(self.grid[xi][yi])
         return result
 
-    def get_adjacency_n(self, x, y):
+    def get_adjacency(self, x, y):
         positions = self.get_surrounding(x, y)
         n_mines = sum(1 if w.is_mine() else 0 for w in positions)
-
         return n_mines
 
     def add_mines(self):

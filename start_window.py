@@ -23,8 +23,9 @@ class MainWindow:
         """sprawdzanie poprwaności wprowadzanych danych"""
         if not val.get().isdigit():
             return False
-        if (max_amount is not None and int(val.get()) < max_amount) or MIN_BOARD_SIZE <= int(
-                val.get()) <= MAX_BOARD_SIZE:
+        if max_amount is not None and int(val.get()) < max_amount:
+            return True
+        if max_amount is None and MIN_BOARD_SIZE <= int(val.get()) <= MAX_BOARD_SIZE:
             return True
         return False
 
