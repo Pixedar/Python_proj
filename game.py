@@ -7,13 +7,13 @@ import resources
 
 CELLS_SIZE = 18
 CELL_MARGIN = 0.25
-
-
+SECRET_CODE = 'xyzzy'
 # pylint: disable=R0201
 class GameController:
     def __init__(self, w, h, bombs):
         self.game_ended = False
         self.game_failed = False
+        self.secret_code_unlocked = False
         self.width = w
         self.height = h
         self.n_mines = bombs
@@ -69,6 +69,7 @@ class GameController:
                 mines.append((x, y))
 
     def main_loop(self, frame):
+        key_seq = []
         while True:
             self.check_game_status()
             pos = pg.mouse.get_pos()
@@ -82,6 +83,13 @@ class GameController:
                     return True
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     self.update_cell_status(event, row, column)
+                if event.type == pg.KEYDOWN:
+                    key_seq.append(event.unicode)
+                    if SECRET_CODE in ''.join(key_seq):
+                        self.secret_code_unlocked = True
+                        key_seq = []
+                        print('success')
+
 
             self.draw(frame)
             if self.game_ended:
@@ -135,7 +143,7 @@ class GameController:
             for column in range(self.height):
                 rect = self.get_cell_rect(row, column)
                 cell = self.grid[row][column]
-                cell.draw(frame, rect, self.font)
+                cell.draw(frame, rect, self.font,self.secret_code_unlocked)
 
     def check_game_status(self):
         flag_sum = 0

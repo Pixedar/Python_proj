@@ -40,9 +40,9 @@ class Cell:
     def set_num_of_adjacent(self, num):
         self.adjacent = num
 
-    def draw(self, frame, rect, font):
+    def draw(self, frame, rect, font,unlocked = False):
         if not self.cell_dead:
-            pg.draw.rect(frame, self.get_cell_color(), rect)
+            pg.draw.rect(frame, self.get_cell_color(unlocked), rect)
         elif self.mine:
             frame.blit(resources.Assets.bomb, rect)
 
@@ -57,12 +57,14 @@ class Cell:
         if self.cursor_above:
             self.cursor_above = False
 
-    def get_cell_color(self):
+    def get_cell_color(self,unlocked):
         if self.inactive:
             return pg.Color(resources.Colors.INACTIVE_CELL_COLOR)
         elif self.possibly_mine:
             return pg.Color(resources.Colors.POSSIBLY_MINE)
         elif self.cursor_above:
+            return pg.Color(resources.Colors.CURSOR_ABOVE)
+        elif unlocked and self.mine:
             return pg.Color(resources.Colors.CURSOR_ABOVE)
         return pg.Color(resources.Colors.ACTIVE_CELL_COLOR)
 

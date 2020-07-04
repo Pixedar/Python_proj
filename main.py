@@ -17,10 +17,10 @@ def start_button_callback(obj, w, h, amount):
 
 
 def main():
-    #main_window = m_window.MainWindow()
-    #main_window.init(start_button_callback).mainloop()
-    main_test = tests.GameTest()
-    main_test.cell_test_2()
+    main_window = m_window.MainWindow()
+    main_window.init(start_button_callback).mainloop()
+    # main_test = tests.GameTest()
+    # main_test.cell_test_2()
 
 if __name__ == '__main__':
     main()
