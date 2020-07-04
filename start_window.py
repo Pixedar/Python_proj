@@ -87,5 +87,7 @@ class MainWindow:
         """metoda zamykająca okno"""
         try:
             self.frame.destroy()
+            return True
         except NameError:
             logging.warning('nie można zmknąc okna')
+            return False

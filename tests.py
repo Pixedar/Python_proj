@@ -23,6 +23,13 @@ class MainTests(unittest.TestCase):
         amount = tk.StringVar(value=b)
         self.assertFalse(main.start_button_callback(main_window, width, height, amount))
 
+class StartWindowTest(unittest.TestCase):
+    def exit_test(self):
+        w = start_window.MainWindow()
+        w.frame = None
+        self.assertFalse(w.exit())
+
+
 class GameTest(unittest.TestCase):
     def cell_test_1(self):
         g = game.GameWindow(10,10,0)

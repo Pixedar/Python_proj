@@ -1,4 +1,5 @@
 import random
+import time
 
 import pygame as pg
 
@@ -8,9 +9,13 @@ import resources
 CELLS_SIZE = 18
 CELL_MARGIN = 0.25
 SECRET_CODE = 'xyzzy'
+MOUSE_LEFT_CLICK_KEY_CODE = 1
+MOUSE_RIGHT_CLICK_KEY_CODE = 3
 # pylint: disable=R0201
 class GameController:
     def __init__(self, w, h, bombs):
+        self.game_start_time =time.time()
+        self.game_ended_time = 0
         self.game_ended = False
         self.game_failed = False
         self.secret_code_unlocked = False
@@ -31,7 +36,7 @@ class GameController:
             for yi in range(max(0, y - 1), min(y + 2, self.height)):
                 cell = self.grid[xi][yi]
                 if not cell.is_mine() and not cell.flagged and not cell.possibly_mine:
-                    if cell.adjacent == 0 and not cell.is_inactive():
+                    if cell.adjacent is 0 and not cell.is_inactive():
                         cell.set_inactive(True)
                         self.expand(xi, yi)
                     else:
@@ -79,21 +84,22 @@ class GameController:
                 self.grid[row][column].cursor_above = True
 
             for event in pg.event.get():
-                if event.type == pg.QUIT:
+                if event.type is pg.QUIT:
                     return True
-                elif event.type == pg.MOUSEBUTTONDOWN:
+                elif event.type is pg.MOUSEBUTTONDOWN:
                     self.update_cell_status(event, row, column)
-                if event.type == pg.KEYDOWN:
+                if event.type is pg.KEYDOWN:
+
                     key_seq.append(event.unicode)
                     if SECRET_CODE in ''.join(key_seq):
                         self.secret_code_unlocked = True
                         key_seq = []
                         print('success')
 
-
             self.draw(frame)
             if self.game_ended:
                 self.end_seq(frame)
+
             pg.display.flip()
 
     def end_seq(self, frame):
@@ -102,7 +108,7 @@ class GameController:
         self.grid[a][b].cell_dead = True
 
         img = resources.Assets.win
-        text = 'WYGRAŁEŚ !'
+        text = 'WYGRAŁEŚ w {} s'.format(round(self.game_ended_time-self.game_start_time ))
         if self.game_failed:
             img = resources.Assets.death
             text = 'PRZEGRAŁEŚ !'
@@ -122,7 +128,7 @@ class GameController:
         if not (row in range(0, self.width) and column in range(0, self.height)):
             return
         cell = self.grid[row][column]
-        if event.button == 1:
+        if event.button is MOUSE_LEFT_CLICK_KEY_CODE:
             if cell.flagged or cell.possibly_mine:
                 return
             if cell.is_mine():
@@ -130,7 +136,7 @@ class GameController:
                 self.game_failed = True
             cell.set_inactive(True)
             self.expand(row, column)
-        elif event.button == 3:
+        elif event.button is MOUSE_RIGHT_CLICK_KEY_CODE:
             cell.set_flag()
 
     def draw(self, frame):
@@ -156,6 +162,8 @@ class GameController:
                 if cell.flagged:
                     flag_sum = flag_sum + 1
         if self.n_mines == flag_sum and inactive_sum == self.width * self.height - self.n_mines:
+            if not self.game_ended:
+                self.game_ended_time = time.time()
             self.game_ended = True
 
     def get_cell_rect(self, row, column):
