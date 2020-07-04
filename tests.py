@@ -1,10 +1,14 @@
-import main
+"""Testy programu."""
 import unittest
+
+import tkinter as tk
+
+import main
 import game
 import resources
 import start_window
-import tkinter as tk
 import pygame as pg
+
 
 class MainTests(unittest.TestCase):
     def board_size_test(self):
@@ -23,6 +27,7 @@ class MainTests(unittest.TestCase):
         amount = tk.StringVar(value=b)
         self.assertFalse(main.start_button_callback(main_window, width, height, amount))
 
+
 class StartWindowTest(unittest.TestCase):
     def exit_test(self):
         w = start_window.MainWindow()
@@ -32,16 +37,18 @@ class StartWindowTest(unittest.TestCase):
 
 class GameTest(unittest.TestCase):
     def cell_test_1(self):
-        g = game.GameWindow(10,10,0)
-        self.assertEqual(g.game_controller.get_adjacency(0,0),0)
+        g = game.GameWindow(10, 10, 0)
+        self.assertEqual(g.game_controller.get_adjacency(0, 0), 0)
+
     def cell_test_2(self):
         g = game.GameWindow(4, 4, 16)
-        #g.start_game()
+        # g.start_game()
         event = pg.event.get()
         event.button = 1
         print(event.button)
-        g.game_controller.update_cell_status(event,1,1)
         g.game_controller.update_cell_status(event, 1, 1)
+        g.game_controller.update_cell_status(event, 1, 1)
+
 
 class AssetsTest(unittest.TestCase):
     def file_test(self):

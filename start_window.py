@@ -91,3 +91,9 @@ class MainWindow:
         except NameError:
             logging.warning('nie można zmknąc okna')
             return False
+
+# niektóre metody są statyczne poniważ zarówno pylint jak i ide podpowiadało
+# że "Method could be a function" pierwszym proponowym
+# rozwiązaniem było umieszanie metody poza klasą,
+# co bardzo brzydko wyglądało, alternatywnym rozwiązaniem
+# było @staticmethod nie jestem pewien ktore rozwiąznie jest poprawne
