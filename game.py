@@ -177,7 +177,7 @@ class GameController:
             cell.inactive = True
             self.expand(row, column)
         elif event.button is MOUSE_RIGHT_CLICK_KEY_CODE:
-            cell.flag = True
+            cell.set_flag()
 
     def draw(self, frame):
         """Metoda rysująca planszę."""
