@@ -37,6 +37,7 @@ class StartWindowTest(unittest.TestCase):
 
 class GameTest(unittest.TestCase):
     def cell_test_1(self):
+        """Testuje sąsiedzctwo celi"""
         g = game.GameWindow(10, 10, 0)
         self.assertEqual(g.game_controller.get_adjacency(0, 0), 0)
 
@@ -47,11 +48,17 @@ class GameTest(unittest.TestCase):
         event.button = 1
         print(event.button)
         g.game_controller.update_cell_status(event, 1, 1)
-        g.game_controller.update_cell_status(event, 1, 1)
+
+    def status_test(self):
+        g = game.GameWindow(10,10,0)
+        g.start_game()
+        g.game_controller.game_ended = True
+
 
 
 class AssetsTest(unittest.TestCase):
     def file_test(self):
+        """Testuje wczytywanie danych"""
         resources.Assets.load()
         self.assertIsNotNone(resources.Assets.bomb)
         self.assertIsNotNone(resources.Assets.flag)

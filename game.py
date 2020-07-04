@@ -1,5 +1,6 @@
 """Moduł okna gry saper"""
 
+from dataclasses import dataclass
 import random
 import time
 
@@ -20,13 +21,13 @@ WINDOW_TITLE = 'Saper'
 class GameWindow:
     """Głowne okno gry."""
 
-    def __init__(self, w, h, bombs):
+    def __init__(self, width, height, bombs):
         """Inicjalizuje: kontroler gry,pygmae oraz ustawia wielkość i tytuł okna."""
         pg.init()
         resources.Assets.load(CELLS_SIZE)
-        self.frame = pg.display.set_mode(self.get_window_size(w, h))
+        self.frame = pg.display.set_mode(self.get_window_size(height, width))
         pg.display.set_caption(WINDOW_TITLE)
-        self.game_controller = GameController(w, h, bombs)
+        self.game_controller = GameController(height, width, bombs)
 
     def start_game(self):
         """startuje grę."""
@@ -40,17 +41,17 @@ class GameWindow:
         return [size * height + margin, size * width + margin]
 
 
-# pylint: disable=R0201
+@dataclass
 class GameController:
     """Klasa odpowiedzialna na kontrolowanie gry."""
+    game_ended_time: int = 0
+    game_ended: bool = False
+    game_failed: bool = False
+    secret_code_unlocked: bool = False
 
     def __init__(self, w, h, bombs):
         """Inicjalizuje klasę."""
         self.game_start_time = time.time()
-        self.game_ended_time = 0
-        self.game_ended = False
-        self.game_failed = False
-        self.secret_code_unlocked = False
         self.width = w
         self.height = h
         self.n_mines = bombs
@@ -115,7 +116,10 @@ class GameController:
         key_seq = []
         loop_status = True
         while loop_status:
-            self.check_game_status()
+            if self.check_game_status() and not self.game_ended:
+                self.game_ended_time = time.time()
+                self.game_ended = True
+
             pos = pg.mouse.get_pos()
             column = pos[0] // (CELLS_SIZE + self.margin)
             row = pos[1] // (CELLS_SIZE + self.margin)
@@ -200,9 +204,8 @@ class GameController:
                 if cell.flagged:
                     flag_sum = flag_sum + 1
         if self.n_mines is flag_sum and inactive_sum is self.width * self.height - self.n_mines:
-            if not self.game_ended:
-                self.game_ended_time = time.time()
-            self.game_ended = True
+            return True
+        return False
 
     def get_cell_rect(self, row, column):
         """Zwraca krztałt (tutuaj kwadrat) który definuje komórkę na planszy."""

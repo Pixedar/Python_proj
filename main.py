@@ -11,7 +11,7 @@ def start_button_callback(obj, w, h, amount):
         return False
     else:
         obj.exit()
-        game = GameWindow(int(w.get()), int(w.get()), int(amount.get()))
+        game = GameWindow(int(w.get()), int(h.get()), int(amount.get()))
         game.start_game()
         return True
 
