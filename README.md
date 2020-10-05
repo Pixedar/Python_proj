@@ -109,11 +109,12 @@ Below are some experimental result:
 ### Image classification
 For Image classification neural newtork has been trained to detect deforestation through oil palm plantation growth. For this task dataset from [WiDS Datathon 2019](https://www.kaggle.com/c/widsdatathon2019/overview) was used. The size of final model is similar to object detection (about 0.8MB).
 Below are results from raw camera data:
+
 ![](https://drive.google.com/uc?id=1K1N7CGnCnQSHTUkumZ_dLRZ-IYS3W-Fk)
 
-###Noise reduction
+### Noise reduction
 Coming soon...
-###UART MCU comunication
+### UART MCU comunication
 MaixPy board can communicate with external module (e.g. satelite obc) through UART interface. To increase data transfer security error detection algorithm is impelemented on top of UART interface.
 
 List of supported commands:
