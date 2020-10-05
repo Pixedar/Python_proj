@@ -106,10 +106,11 @@ Below are some experimental result:
 | ------------- | ------------- |
 |<div style="text-align:center"><img src="https://raw.githubusercontent.com/Pixedar/Python_proj/master/assets/setup_ai.jpg?token=ABSX2TZLTJMVQFBBYAJOIUC7QS76G" width="240" height="240"></div> |<div style="text-align:center"><img src="https://raw.githubusercontent.com/Pixedar/Python_proj/master/assets/raw_a.gif?token=ABSX2TY5EEYVDMOC7CYFQR27QTAB4" /> |
 
-###Image classification
+### Image classification
 For Image classification neural newtork has been trained to detect deforestation through oil palm plantation growth. For this task dataset from [WiDS Datathon 2019](https://www.kaggle.com/c/widsdatathon2019/overview) was used. The size of final model is similar to object detection (about 0.8MB).
 Below are results from raw camera data:
 ![](https://drive.google.com/uc?id=1K1N7CGnCnQSHTUkumZ_dLRZ-IYS3W-Fk)
+
 ###Noise reduction
 Coming soon...
 ###UART MCU comunication
