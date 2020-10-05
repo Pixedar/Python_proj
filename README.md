@@ -48,7 +48,7 @@ Implementation of artificial intelligence image processing on Sipeed Maix develo
 
 | Image rendered by dataset generator: [A] | Image A captured by camera | Image A modified by dataset calibrator |
 | ------------- |:-------------:| -----:|
-|![](https://drive.google.com/uc?id=10Nyu9dvQ_0lsK-NU8srkLg5okPTK_Gly)|![](https://drive.google.com/uc?id=1BVCvRmP7iAEkJ2azVaCL0TaikK6PAlZG)|![](https://drive.google.com/uc?id=1mS8IPRJQrM6Ho7R5zZ_s1JX_Eufm6DYP)|
+|![](https://raw.githubusercontent.com/Pixedar/Python_proj/master/assets/0012.jpg?token=ABSX2T3EKSSK6J7V22MJFNS7QS6GC)|![](https://raw.githubusercontent.com/Pixedar/Python_proj/master/assets/0012org.jpg?token=ABSX2T2LRA6EESYV64ICADS7QS6MA)|![](https://raw.githubusercontent.com/Pixedar/Python_proj/master/assets/0012popr.jpg?token=ABSX2T4XEQKX4P2DJOIEPYS7QS6NK)|
 ### Object detection and tracking
 Neural newtork has been trained on generated datased using keras-based framework [aXeleRate](https://github.com/AIWintermuteAI/aXeleRate).  Thanks to MobileNet5_0 NN architecture the size of final model is just 0.8MB.
 
