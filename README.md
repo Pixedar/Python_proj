@@ -1,4 +1,4 @@
-<div style="text-align:center"><img src=https://drive.google.com/uc?id=1ESDZn7xXU-BxeDaWwSYVPdHERqm8WZ6e /></div>
+
 
 ![asdfa](https://img.shields.io/github/release/pandao/editor.md.svg)
 # AI for space
